@@ -8,59 +8,50 @@ const nums = input[1].split(" ").map(Number);
 let [p, m, x, d] = input[2].split(" ").map(Number);
 
 function solution(N, nums, p, m, x, d) {
-  let useOperators = [];
+  let start = nums.shift();
+  let operaterArr = [p, m, x, d];
 
-  for (let i = 0; i < p; i++) useOperators.push("+");
-  for (let i = 0; i < m; i++) useOperators.push("-");
-  for (let i = 0; i < x; i++) useOperators.push("*");
-  for (let i = 0; i < d; i++) useOperators.push("/");
-
-  let max = Number.MIN_SAFE_INTEGER;
+  let max = -Infinity;
   let min = Infinity;
-  let isUsed = Array(useOperators.length).fill(0);
-  function getpermutation(arr) {
-    if (arr.length === N) {
-      go(arr);
+
+  rec([]);
+  return max + "\n" + min;
+
+  //
+  function rec(arr) {
+    if (arr.length === N - 1) {
+      let result = calculate(arr);
+      max = Math.max(result, max);
+      min = Math.min(result, min);
       return;
     }
-    for (let i = 0; i < useOperators.length; i++) {
-      if (isUsed[i]) continue;
-      isUsed[i] = 1;
-      arr.push(useOperators[i]);
-      getpermutation(arr);
+    for (let i = 0; i < operaterArr.length; i++) {
+      if (operaterArr[i] === 0) continue;
+      operaterArr[i]--;
+      arr.push(i);
+      rec(arr);
       arr.pop();
-      isUsed[i] = 0;
+      operaterArr[i]++;
     }
   }
-  getpermutation(["dummy"]);
 
-  function go(operators) {
-    let curNum = nums[0];
-    for (let index = 1; index < operators.length; index++) {
-      let operator = operators[index];
-      let nextNum = curNum;
-      if (operator === "+") {
-        nextNum = curNum + nums[index];
+  function calculate(operaters) {
+    let num = start;
+
+    for (let i = 0; i < operaters.length; i++) {
+      if (operaters[i] === 0) {
+        num += nums[i];
+      } else if (operaters[i] === 1) {
+        num -= nums[i];
+      } else if (operaters[i] === 2) {
+        num *= nums[i];
+      } else if (operaters[i] === 3) {
+        if (num < 0) {
+          num = -Math.floor(-num / nums[i]);
+        } else num = Math.floor(num / nums[i]);
       }
-      if (operator === "-") {
-        nextNum = curNum - nums[index];
-      }
-      if (operator === "*") {
-        nextNum = curNum * nums[index];
-      }
-      if (operator === "/") {
-        if (curNum < 0) {
-          nextNum = 0 - Math.floor(Math.abs(curNum) / nums[index]);
-        } else {
-          nextNum = Math.floor(curNum / nums[index]);
-        }
-      }
-      curNum = nextNum;
     }
-    max = Math.max(curNum, max);
-    min = Math.min(curNum, min);
+    return num;
   }
-
-  return max + "\n" + min;
 }
 console.log(solution(N, nums, p, m, x, d));
